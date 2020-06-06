@@ -2,18 +2,29 @@ import pandas as pd
 import numpy as np
 
 def sections():
-    """Returns a DataFrame with all Industry Sectors"""
+    """Returns a DataFrame with all Industry Sectors
+    """
     return pd.DataFrame({'Section': _get_sections(),
                          'SectDescription': _get_section_descriptions()})
 
 def drop_sic_codes_na(df):
-    """Removes all rows with missing SicCodes"""
-    return df.dropna(subset=['SicCodes'])
+    """Removes all rows with missing SicCodes
+    """
+    return df.dropna(subset=['SicCodes']).reset_index(drop=True)
 
 def clean_sic_codes(df):
-    """Cleans lists of SicCodes"""
+    """Cleans lists of SicCodes
+    """
     df = _codes_to(df, str)
     df.SicCodes = df.SicCodes.apply(_strip_and_split)
+    return df
+
+def add_sections(df):
+    """Maps five digit SicCodes to single character Sections and stores them in SicSections
+    """
+    codes_to_section = _build_code_to_section_dict()
+    sic_sections = df.SicCodes.apply(map_codes_to_section, args=(codes_to_section,))
+    df['SicSections'] = sic_sections
     return df
 
 def split_sectors(df):
@@ -36,6 +47,9 @@ def _get_section_descriptions():
 def _codes_to(df, typ):
     df.SicCodes = df.SicCodes.astype(typ)
     return df
+
+def map_codes_to_section(codes, codes_to_section):
+    return np.unique([codes_to_section[int(code)] for code in codes])
 
 def _generate_dummies(df, sections):
     dummies = _build_empty_dummies(df, sections)
@@ -75,7 +89,9 @@ def _load_codes():
 
 def main():
     df = pd.read_csv('data/UK-Gender-Pay-Gap-Data-2018-2019.csv')
-    return split_sectors(df)
+    df = drop_sic_codes_na(df)
+    df = clean_sic_codes(df)
+    return df
 
 if __name__ == "__main__":
     df = main()
