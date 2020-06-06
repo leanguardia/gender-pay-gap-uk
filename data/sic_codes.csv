@@ -728,5 +728,5 @@ sic_code,sic_description,section,section_description,sic_version
 98000,Residents property management,T,Activities of households as employers; undifferentiated,SIC 2007
 98100,Undifferentiated goods-producing activities of private households for own use,T,Activities of households as employers; undifferentiated,SIC 2007
 98200,Undifferentiated service-producing activities of private households for own use bodies,T,Activities of households as employers; undifferentiated,SIC 2007
-99000,Activities of extraterritorial organisations and bodies,U,Activities of extraterritorial organisations and,SIC 2007
-99999,Dormant Company,U,Activities of extraterritorial organisations and,SIC 2007
+99000,Activities of extraterritorial organisations and bodies,U,Activities of extraterritorial organisations and bodies,SIC 2007
+99999,Dormant Company,U,Activities of extraterritorial organisations and bodies,SIC 2007
