@@ -1,55 +1,60 @@
 import pandas as pd
 import numpy as np
 
-def sections():
-    """Returns a DataFrame with all Industry Sectors
-    """
-    return pd.DataFrame({'Section': _get_sections(),
-                         'SectDescription': _get_section_descriptions()})
-
 def drop_sic_codes_na(df):
-    """Removes all rows with missing SicCodes
+    """ Removes all rows with missing SicCodes
     """
     return df.dropna(subset=['SicCodes']).reset_index(drop=True)
 
 def clean_sic_codes(df):
-    """Cleans lists of SicCodes
+    """ Cleans lists of SicCodes
     """
     df = _codes_to(df, str)
     df.SicCodes = df.SicCodes.apply(_strip_and_split)
     return df
 
 def add_sections(df):
-    """Maps five digit SicCodes to single character Sections and stores them in SicSections
+    """ Maps five digit SicCodes to single character Sections and stores them in SicSections
     """
     codes_to_section = _build_code_to_section_dict()
-    sic_sections = df.SicCodes.apply(map_codes_to_section, args=(codes_to_section,))
+    sic_sections = df.SicCodes.apply(_map_codes_to_section, args=(codes_to_section,))
     df['SicSections'] = sic_sections
     return df
 
-def split_sectors(df):
-    """Splitting Industry Sections"""
-    df = df.copy()
-    df = drop_sic_codes_na(df)
-    df = _codes_to(df, str)
-    df = clean_sic_codes(df)
-    sections = _get_sections()
-    dummies = _generate_dummies(df, sections)
-    df = df.join(dummies)
+def explode_sections(df):
+    """ Creates a row for each of the industry sections a company belongs.
+        Additionaly, the section description is added in a new column
+    """
+    df = df.explode('SicSections')
+    section_to_desc = _build_section_to_desc_dict()
+    df['SectDesc'] = df.SicSections.map(section_to_desc)
     return df
+
+# def split_sectors(df):
+#     """Splitting Industry Sections"""
+#     df = df.copy()
+#     df = drop_sic_codes_na(df)
+#     df = _codes_to(df, str)
+#     df = clean_sic_codes(df)
+#     sections = _get_sections()
+#     dummies = _generate_dummies(df, sections)
+#     df = df.join(dummies)
+#     return df
 
 def _get_sections():
     return pd.unique(_load_codes().Section)
 
 def _get_section_descriptions():
-    return pd.unique(_load_codes().SectionDesc)
+    return pd.Series(_load_codes().SectionDesc.unique()).apply(_first_sentence)
 
 def _codes_to(df, typ):
     df.SicCodes = df.SicCodes.astype(typ)
     return df
 
-def map_codes_to_section(codes, codes_to_section):
-    return np.unique([codes_to_section[int(code)] for code in codes])
+def _map_codes_to_section(codes, codes_to_section):
+    return np.unique(
+        [codes_to_section[int(code)] for code in codes if int(code) in codes_to_section]
+    )
 
 def _generate_dummies(df, sections):
     dummies = _build_empty_dummies(df, sections)
@@ -70,11 +75,17 @@ def _build_code_to_section_dict():
     for i, sic_code in enumerate(codes.SicCodes):
         row = codes.iloc[i]
         code_to_section[row.SicCodes] = row.Section
-    code_to_section[1] = "Unknown"
+    # code_to_section[1] = "Unknown" # Uncomment to encode invalid value (1)
     return code_to_section
+
+def _build_section_to_desc_dict():
+    return dict(zip(_get_sections(), _get_section_descriptions()))
 
 def _strip_and_split(codes):
     return codes.replace('\r\n','').split(',')
+
+def _first_sentence(description):
+    return description.split(';')[0]
 
 def _load_codes():
     codes = pd.read_csv('data/sic_codes.csv')
