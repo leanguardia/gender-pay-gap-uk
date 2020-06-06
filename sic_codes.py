@@ -2,17 +2,26 @@ import pandas as pd
 import numpy as np
 
 def sections():
+    """Returns a DataFrame with all Industry Sectors"""
     return pd.DataFrame({'Section': _get_sections(),
                          'SectDescription': _get_section_descriptions()})
 
-def split_sectors(df):
-    """
-      Splitting Industry Sections
-    """
-    df = df.copy()
-    df = _drop_sic_codes_na(df)
+def drop_sic_codes_na(df):
+    """Removes all rows with missing SicCodes"""
+    return df.dropna(subset=['SicCodes'])
+
+def clean_sic_codes(df):
+    """Cleans lists of SicCodes"""
     df = _codes_to(df, str)
-    df = _parse_codes(df)
+    df.SicCodes = df.SicCodes.apply(_strip_and_split)
+    return df
+
+def split_sectors(df):
+    """Splitting Industry Sections"""
+    df = df.copy()
+    df = drop_sic_codes_na(df)
+    df = _codes_to(df, str)
+    df = clean_sic_codes(df)
     sections = _get_sections()
     dummies = _generate_dummies(df, sections)
     df = df.join(dummies)
@@ -24,15 +33,8 @@ def _get_sections():
 def _get_section_descriptions():
     return pd.unique(_load_codes().SectionDesc)
 
-def _drop_sic_codes_na(df):
-    return df.dropna(subset=['SicCodes'])
-
 def _codes_to(df, typ):
     df.SicCodes = df.SicCodes.astype(typ)
-    return df
-
-def _parse_codes(df):
-    df.SicCodes = df.SicCodes.apply(_strip_and_split)
     return df
 
 def _generate_dummies(df, sections):
