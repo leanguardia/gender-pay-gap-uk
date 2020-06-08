@@ -30,16 +30,18 @@ def explode_sections(df):
     df['SectDesc'] = df.SicSections.map(section_to_desc)
     return df
 
-# def split_sectors(df):
-#     """Splitting Industry Sections"""
-#     df = df.copy()
-#     df = drop_sic_codes_na(df)
-#     df = _codes_to(df, str)
-#     df = clean_sic_codes(df)
-#     sections = _get_sections()
-#     dummies = _generate_dummies(df, sections)
-#     df = df.join(dummies)
-#     return df
+def split_sectors(df):
+    """ Splits elements in Sic Codes list and distributes them in 21 dummy columns
+        representing whether that company belongs to an Industrial Section or not.
+        Requirements: df should have already gone through `drop_sic_codes` and 
+        `clean_sic_codes`.
+    """
+    df = df.copy()
+    df = drop_sic_codes_na(df)
+    sections = _get_sections()
+    dummies = _generate_dummies(df, sections)
+    df = df.join(dummies)
+    return df
 
 def _get_sections():
     return pd.unique(_load_codes().Section)
@@ -60,13 +62,13 @@ def _generate_dummies(df, sections):
     dummies = _build_empty_dummies(df, sections)
     code_to_section = _build_code_to_section_dict()
     for i, sic_codes in enumerate(df.SicCodes):
-        sections = [code_to_section[int(code)] for code in sic_codes]
+        sections = [code_to_section[int(code)] for code in sic_codes if int(code) in code_to_section]
         indices = np.unique(dummies.columns.get_indexer(sections))
         dummies.iloc[i, indices] = 1
     return dummies.add_prefix('Sect')
 
 def _build_empty_dummies(df, sections):
-    zeroes = np.zeros((df.shape[0], len(sections)))
+    zeroes = np.zeros((df.shape[0], len(sections)), dtype=int)
     return pd.DataFrame(zeroes, columns=sections, index=df.index)
 
 def _build_code_to_section_dict():
