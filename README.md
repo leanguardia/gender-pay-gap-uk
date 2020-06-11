@@ -1,7 +1,11 @@
 ## Gender Pay Gap in the UK
 Data analysis of gender pay gap public reports from UK companies. This data is public and
 available in the government's Gender pay gap service
-[website](gender-pay-gap.service.gov.uk/). 
+[website](gender-pay-gap.service.gov.uk/).
+
+The non-technical description and analysis is found in [this blog
+post](https://medium.com/@leanguardia/this-is-how-the-uk-uses-data-to-reduce-the-gender-pay-gap-9e23b90c17eb).
+
 
 ### Dependencies
 - Python 3
@@ -36,3 +40,6 @@ contrast, the size of the company does not seem to influence it.
 The "Data Science" nanodegree at Udacity. The "Applied Data Science" MSc unit
 at University of Bristol. My group for the final project; Thor, Shivangi, Sharath, Steve and
 Monica. Finally, Wes McKinney for writing "Python for Data Analysis".
+
+### Licence
+MIT License | Copyright (c) 2020 D. Leandro Guardia V.
