@@ -3,9 +3,8 @@ Data analysis of gender pay gap public reports from UK companies. This data is p
 available in the government's Gender pay gap service
 [website](gender-pay-gap.service.gov.uk/).
 
-The non-technical description and analysis is found in [this blog
-post](https://medium.com/@leanguardia/this-is-how-the-uk-uses-data-to-reduce-the-gender-pay-gap-9e23b90c17eb).
-
+### Blog Post
+The contextual background and non-technical analysis can be found [here](https://medium.com/@leanguardia/this-is-how-the-uk-uses-data-to-reduce-the-gender-pay-gap-9e23b90c17eb).
 
 ### Dependencies
 - Python 3
